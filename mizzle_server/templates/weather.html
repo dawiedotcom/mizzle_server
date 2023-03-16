@@ -1,0 +1,36 @@
+{% set page = namespace(path='/') %}
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1> Weather </h1>
+
+<!-- <svg id="test_area" height=200 width=450></svg> -->
+<div class="container">
+  <div class="row" >
+      <div id="area"></div>
+      </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block css %}
+
+<style>
+ .svg-container {
+     display: inline-block;
+ }
+ .svg-content-responsive {
+ }
+</style>
+
+{% endblock %}
+
+{% block scripts %}
+
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v4.js"></script>
+ <script src="{{ url_for('static', filename='weather.js') }}"></script>
+
+{% endblock %}
