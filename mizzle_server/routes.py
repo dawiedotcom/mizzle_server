@@ -1,9 +1,11 @@
 from collections import namedtuple
 from flask import current_app as app
-from flask import render_template
+from flask import render_template, redirect, send_file
 from flask_flatpages import FlatPages
+import re
+import io
 
-from .data import get_time_averaged
+from .data import get_time_averaged, make_csv
 
 pages = FlatPages(app)
 
@@ -41,8 +43,15 @@ def download():
 @app.route('/download/<filename>')
 def download_file(filename):
     print(filename)
+    if not re.fullmatch('\d\d\d\d-\d\d-\d\d', filename):
+        return redirect('/download')
 
-    return download()
+    csv_content = make_csv(filename)
+
+    return send_file(
+        io.BytesIO(csv_content),
+        download_name=f'{filename}_minute_data.csv',
+    )
 
 @app.route('/data/<time_bucket_hours>')
 def data(time_bucket_hours):

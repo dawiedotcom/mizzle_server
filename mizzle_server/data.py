@@ -30,3 +30,37 @@ def get_time_averaged(time_bucket_hours):
     #if format == 'json':
     #    return data.to_json(date_format='iso', orient='records')
     #return data
+
+def make_csv_query(date):
+    return f'''
+    select
+         to_char(datetime, 'YYYY-MM-DD HH24:MI:SS') as datetime,
+         wind_dir_min,
+         wind_dir_ave,
+         wind_dir_max,
+         wind_speed_min,
+         wind_speed_ave,
+         wind_speed_max,
+         temp_air,
+         humidity,
+         pressure,
+         rain_accum,
+         rain_duration,
+         rain_intensity,
+         hail_accum,
+         hail_duration,
+         hail_intensity
+    from
+        mizzle_readings
+    where
+         to_char(datetime, 'YYYY-MM-DD') = '{date}'
+    order by
+         datetime
+    '''
+
+def make_csv(date):
+    data = query(make_csv_query(date))
+    csv_str = data.to_csv(
+        index=False,
+    )
+    return csv_str.encode('utf-8')
