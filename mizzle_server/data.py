@@ -60,7 +60,10 @@ def make_csv_query(date):
 
 def make_csv(date):
     data = query(make_csv_query(date))
-    csv_str = data.to_csv(
+    csv_str = 'Date/Time,Dn,Dm,Dx,Sn,Sm,Sx,Ta,Ha,Pa,Rc,Rd,Ri,Hc,Hd,Hi\n'
+    csv_str += 'YYYY-MM-DD HH:MM:SS,D,D,D,M,M,M,C,P,H,M,s,M,M,s,M\n'
+    csv_str += data.to_csv(
         index=False,
+        header=False,
     )
     return csv_str.encode('utf-8')
