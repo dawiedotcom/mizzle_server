@@ -30,7 +30,7 @@ def index():
 def download():
     days = get_time_averaged(24)
     csv_files = [
-        str(date).split(' ')[0]
+        str(date).split(' ')[0] + '_minute_data.csv'
         for date in days['time'].tolist()
     ]
     csv_files = sorted(csv_files, reverse=True)
@@ -43,14 +43,15 @@ def download():
 @app.route('/download/<filename>')
 def download_file(filename):
     print(filename)
-    if not re.fullmatch('\d\d\d\d-\d\d-\d\d', filename):
+    if not re.fullmatch('\d\d\d\d-\d\d-\d\d_minute_data.csv', filename):
         return redirect('/download')
 
-    csv_content = make_csv(filename)
+    date = filename.split('_')[0]
+    csv_content = make_csv(date)
 
     return send_file(
         io.BytesIO(csv_content),
-        download_name=f'{filename}_minute_data.csv',
+        download_name=filename,
     )
 
 @app.route('/data/<time_bucket_hours>')
