@@ -1,0 +1,18 @@
+{% set page = namespace(path='/download') %}
+{% extends "base.html" %}
+
+{% block content %}
+
+<ul class="list-group">
+    {% for csv in csv_files %}
+    <li class="list-group-item"> <a href="{{ url_for('download_file', filename=csv ) }}"> {{ csv }} </a> </li>
+    {% endfor %}
+</ul>
+
+{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
