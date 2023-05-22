@@ -26,5 +26,7 @@ def query(q):
     return data
 
 def get_time_averaged(time_bucket_hours):
-    data = query(make_timescale_query(time_bucket_hours))
-    return data.to_json(date_format='iso', orient='records')
+    return query(make_timescale_query(time_bucket_hours))
+    #if format == 'json':
+    #    return data.to_json(date_format='iso', orient='records')
+    #return data

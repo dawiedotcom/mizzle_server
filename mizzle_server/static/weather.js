@@ -24,6 +24,10 @@ function get_humidity_domain(data) {
     return get_domain(data, function(d) {return d.humidity; });
 }
 
+function mouseover(d) {
+    console.log(d);
+}
+
 function update_graph(data) {
     // Parse timestamps from iso strings into Date objects
     for (i in data) {
@@ -48,10 +52,12 @@ function update_graph(data) {
         .attr('height', svg_height)
         .style("display", "block")
         .style("margin", "auto")
+        .on('mouseover', mouseover)
         //.attr('viewBox', '0 0 600 300')
         //.attr('class', 'svg-content-responsive')
         .append('g')
         .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
 
     // X axis scale
     var x =
@@ -61,22 +67,28 @@ function update_graph(data) {
 
     const y_meta = [
         {
+            variable: 'temp_air',
             text_label: 'Temp.',
             unit_label: '[C]',
             height: 0.6,
             domain: get_temp_domain(data),
+            stroke_color: '#1b9e77',
         },
         {
+            variable: 'pressure',
             text_label: 'Pressure',
             unit_label: '[kPa]',
             height: 0.2,
             domain: get_pressure_domain(data),
+            stroke_color: '#d95f02',
         },
         {
+            variable: 'humidity',
             text_label: 'Humidity',
             unit_label: '[%]',
             height: 0.2,
             domain: get_humidity_domain(data),
+            stroke_color: '#7570b3',
         },
     ];
     var y_axis_start=0;
@@ -114,67 +126,24 @@ function update_graph(data) {
             .attr('y', (range[0] + range[1])/2.0 + label_offset)
             .text(y_meta[i].unit_label);
 
+        svg.append('path')
+            .datum(data)
+            .attr('fill', 'none')
+            .attr('opacity', 0.8)
+            .attr('stroke', y_meta[i].stroke_color)
+            .attr('stroke-width', '2.5')
+            .attr('d', d3.line()
+                  .curve(d3.curveBasis)
+                  .x(function(d) {return x(d.time); })
+                  .y(function(d) {return y_meta[i].scale(d[y_meta[i].variable]); })
+                 );
+
     }
 
     // Add x axis
     svg.append('g')
         .attr('transform', 'translate(0, ' + axis_height + ')')
         .call(d3.axisBottom(x));
-
-    // Add air temperature data points
-    svg.selectAll('whatever')
-        .data(data)
-        .enter()
-        .append('circle')
-        .attr('cx', function(d) {return x(d.time); })
-        .attr('cy', function(d) {return y_meta[0].scale(d.temp_air); })
-        .attr('r', 2);
-
-    //svg.selectAll('whatever')
-    //    .data(data)
-    //    .enter()
-    //    .append('circle')
-    //    .attr('cx', function(d) {return x(d.time); })
-    //    .attr('cy', function(d) {return y_meta[1].scale(d.pressure); })
-    //    .attr('r', 2);
-
-    data.unshift(data.at(0));
-    data.push(data.at(-1));
-    data[0].pressure = y_meta[1].domain[0];
-    data[data.length-1].pressure = y_meta[1].domain[0];
-    data[0].humidity = y_meta[2].domain[0];
-    data[data.length-1].humidity = y_meta[2].domain[0];
-
-    svg.append('path')
-        .datum(data)
-        .attr('fill', '#4466ee')
-        .attr('opacity', 0.8)
-        .attr('stroke', '#000')
-        .attr('stroke-width', '1')
-        .attr('d', d3.line()
-              .curve(d3.curveBasis)
-              .x(function(d) {return x(d.time); })
-              .y(function(d) {return y_meta[1].scale(d.pressure); })
-             );
-
-    svg.append('path')
-        .datum(data)
-        .attr('fill', '#4466ee')
-        .attr('opacity', 0.2)
-        .attr('d', d3.line()
-              .curve(d3.curveBasis)
-              .x(function(d) {return x(d.time); })
-              .y(function(d) {return y_meta[2].scale(d.humidity); })
-             );
-
-
-    //svg.selectAll('whatever')
-    //    .data(data)
-    //    .enter()
-    //    .append('circle')
-    //    .attr('cx', function(d) {return x(d.time); })
-    //    .attr('cy', function(d) {return y_meta[2].scale(d.humidity); })
-    //    .attr('r', 2);
 
 }
 
