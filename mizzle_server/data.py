@@ -60,8 +60,8 @@ def make_csv_query(date):
 
 def make_csv(date):
     data = query(make_csv_query(date))
-    csv_str = 'Date/Time,Dn,Dm,Dx,Sn,Sm,Sx,Ta,Ha,Pa,Rc,Rd,Ri,Hc,Hd,Hi\n'
-    csv_str += 'YYYY-MM-DD HH:MM:SS,D,D,D,M,M,M,C,P,H,M,s,M,M,s,M\n'
+    csv_str = 'Date/Time,Wind Dir Min,Wind Dir Ave,Wind Dir Max,Wind Speed Min,Wind Speed Ave,Wind Speed Max,Air Temp,Humidity,Air Pressure,Rain Accum,Rain Duration,Rain Intensity,Hail Accum,Hail Duration,Hail Intensity\n'
+    csv_str += 'YYYY-MM-DD HH:MM:SS,Deg,Deg,Deg,m/s,m/s,m/s,Celsius,%RH,hPa,mm,seconds,mm/h,hits/cm2,seconds,hits/cm2/h\n'
     csv_str += data.to_csv(
         index=False,
         header=False,

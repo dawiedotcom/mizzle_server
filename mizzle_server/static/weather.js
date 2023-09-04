@@ -77,7 +77,7 @@ function update_graph(data) {
         {
             variable: 'pressure',
             text_label: 'Pressure',
-            unit_label: '[kPa]',
+            unit_label: '[hPa]',
             height: 0.2,
             domain: get_pressure_domain(data),
             stroke_color: '#d95f02',
