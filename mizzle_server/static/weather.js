@@ -147,8 +147,14 @@ function update_graph(data) {
 
 }
 
+function get_base_uri() {
+    const uri = window.location.href.toString();
+    const hash_pos = uri.indexOf('#');
+    return uri.substring(0, hash_pos > 0 ? hash_pos : uri.length);
+}
+
 function get_data(minute_bucket_size) {
-    const url = encodeURI(location.protocol + '//' + location.host + '/data/' + minute_bucket_size);
+    const url = encodeURI(get_base_uri() + '/data/' + minute_bucket_size);
     fetch(url)
         .then((response) => response.text())
         .then((d) => {
@@ -199,7 +205,7 @@ onhashchange = (event) => {
     }
 
     // 'redirect' to the hour selection for invalid fragments
-    const next_uri = encodeURI(location.protocol + '//' + location.host + '#hour');
+    const next_uri = encodeURI(get_base_uri() + '#hour');
     window.history.replaceState({}, document.title, next_uri);
     get_data(1);
     update_pagination('hour');
