@@ -28,7 +28,7 @@ def index():
 
 @app.route('/download')
 def download():
-    days = get_time_averaged(24)
+    days = get_time_averaged(24*60)
     csv_files = [
         str(date).split(' ')[0] + '_minute_data.csv'
         for date in days['time'].tolist()
