@@ -1,5 +1,4 @@
 
-console.log("hello");
 var dat;
 
 function get_time_domain(data) {
@@ -25,7 +24,7 @@ function get_humidity_domain(data) {
 }
 
 function mouseover(d) {
-    console.log(d);
+
 }
 
 function update_graph(data) {
@@ -44,6 +43,8 @@ function update_graph(data) {
     };
     const svg_width = axis_width + margin.left + margin.right;
     const svg_height = axis_width + margin.top + margin.bottom;
+
+    d3.selectAll('svg').remove();
 
     var svg = d3.select('#area')
         .append('svg')
@@ -110,8 +111,6 @@ function update_graph(data) {
             .append('g')
             .call(d3.axisLeft(y_meta[i].scale));
 
-        console.log(range);
-
         const label_offset = 10;
         svg.append('text')
             .attr('text-anchor', 'middle')
@@ -148,7 +147,7 @@ function update_graph(data) {
 }
 
 function get_data(hour_bucket_size) {
-    const url = encodeURI(window.location.href + '/data/' + hour_bucket_size);
+    const url = encodeURI(location.protocol + '//' + location.host + '/data/' + hour_bucket_size);
     fetch(url)
         .then((response) => response.text())
         .then((d) => {
@@ -157,5 +156,24 @@ function get_data(hour_bucket_size) {
         });
 }
 
-get_data(1);
+function get_hour_bucket_size(uri) {
+    // Get the time bucket based on the url fragment
+    var uri_hours = uri.substring(1, uri.length);
+    return parseInt(uri_hours);
+}
 
+onhashchange = (event) => {
+    // Update the graph when the url fragment changes
+    var uri = window.location.toString();
+    if (!/^#\d+$/.test(window.location.hash)) {
+        // Hash is not an int
+        var base_uri = uri.substring(0, uri.indexOf('#'));
+        window.history.replaceState({}, document.title, base_uri);
+        return;
+    }
+    var hour_bucket = get_hour_bucket_size(window.location.hash);
+    get_data(hour_bucket);
+};
+
+// Initial load
+onhashchange();
