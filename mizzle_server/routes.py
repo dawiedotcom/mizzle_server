@@ -54,15 +54,15 @@ def download_file(filename):
         download_name=filename,
     )
 
-@app.route('/data/<time_bucket_hours>')
-def data(time_bucket_hours):
-    print(time_bucket_hours)
+@app.route('/data/<time_bucket_minutes>')
+def data(time_bucket_minutes):
+    #print(time_bucket_hours)
     try:
-        int(time_bucket_hours)
+        int(time_bucket_minutes)
     except ValueError:
         return '[]'
 
-    return get_time_averaged(time_bucket_hours).to_json(date_format='iso', orient='records')
+    return get_time_averaged(time_bucket_minutes).to_json(date_format='iso', orient='records')
 
 @app.route('/<path:path>')
 def page(path):

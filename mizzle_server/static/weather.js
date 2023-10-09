@@ -1,5 +1,6 @@
 
 var dat;
+const duration_pagination = document.getElementById('duration_pagination').children;
 
 function get_time_domain(data) {
     
@@ -146,8 +147,8 @@ function update_graph(data) {
 
 }
 
-function get_data(hour_bucket_size) {
-    const url = encodeURI(location.protocol + '//' + location.host + '/data/' + hour_bucket_size);
+function get_data(minute_bucket_size) {
+    const url = encodeURI(location.protocol + '//' + location.host + '/data/' + minute_bucket_size);
     fetch(url)
         .then((response) => response.text())
         .then((d) => {
@@ -156,23 +157,52 @@ function get_data(hour_bucket_size) {
         });
 }
 
-function get_hour_bucket_size(uri) {
+function get_url_fragment() {
+    const hash = window.location.hash;
+    return hash.substring(1, hash.length);
+}
+
+function get_minute_bucket_size(fragment) {
     // Get the time bucket based on the url fragment
-    var uri_hours = uri.substring(1, uri.length);
-    return parseInt(uri_hours);
+    if (fragment == 'hour') {
+        return 1;
+    } else if (fragment == 'day') {
+        return 10;
+    } else if (fragment == 'week') {
+        return 60;
+    } else if (fragment == 'month') {
+        return 180;
+    } else if (fragment == 'quarter') {
+        return 720;
+    } else if (fragment == 'year') {
+        return 1448;
+    }
+    return 0;
+}
+
+function update_pagination(fragment) {
+    for (var i=0; i<duration_pagination.length; i++) {
+        const li = duration_pagination[i];
+        li.classList = li.id.indexOf(fragment) > 0 ? "page-item active" : "page-item";
+    }
 }
 
 onhashchange = (event) => {
     // Update the graph when the url fragment changes
-    var uri = window.location.toString();
-    if (!/^#\d+$/.test(window.location.hash)) {
-        // Hash is not an int
-        var base_uri = uri.substring(0, uri.indexOf('#'));
-        window.history.replaceState({}, document.title, base_uri);
+
+    const fragment = get_url_fragment();
+    const time_bucket = get_minute_bucket_size(fragment);
+    if (time_bucket > 0) {
+        get_data(time_bucket);
+        update_pagination(fragment);
         return;
     }
-    var hour_bucket = get_hour_bucket_size(window.location.hash);
-    get_data(hour_bucket);
+
+    // 'redirect' to the hour selection for invalid fragments
+    const next_uri = encodeURI(location.protocol + '//' + location.host + '#hour');
+    window.history.replaceState({}, document.title, next_uri);
+    get_data(1);
+    update_pagination('hour');
 };
 
 // Initial load
