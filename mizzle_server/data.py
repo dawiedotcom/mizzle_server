@@ -18,7 +18,7 @@ def make_timescale_query(n_minutes, limit):
     from
         mizzle_readings
     group by time
-    order by time
+    order by time desc
     {limit_clause}
     '''
 
