@@ -1,10 +1,45 @@
 
 var dat;
 const duration_pagination = document.getElementById('duration_pagination').children;
+const graph_title = document.getElementById('graph_title');
+
+function get_url_fragment() {
+    const hash = window.location.hash;
+    return hash.substring(1, hash.length);
+}
+
+function update_title(data) {
+
+    const fragment = get_url_fragment();
+
+    const end = data[0].time;
+    const start = data[data.length-1].time;
+
+    if (fragment == "hour" && start.getUTCDay() == end.getUTCDay()) {
+        graph_title.innerHTML = (
+            start.toLocaleTimeString() + " to " +
+                end.toLocaleTimeString() + " " +
+                end.toDateString()
+        );
+    }
+    else if (fragment == "hour" || fragment == "day") {
+        graph_title.innerHTML = (
+            start.toLocaleTimeString() + " " + start.toDateString()
+                + " to " +
+                end.toLocaleTimeString() + " " + end.toDateString()
+        );
+    }
+    else
+        graph_title.innerHTML = start.toDateString() + " to " + end.toDateString();
+}
+
+function make_x_axis_label(data) {
+}
 
 function get_time_domain(data) {
-    
+
 }
+
 function get_domain(data, func) {
     min = func(data[0]);
     max = func(data[0]);
@@ -38,7 +73,7 @@ function update_graph(data) {
     const axis_height = 600;
     const margin = {
         left: 140,
-        right: 20,
+        right: 140,
         top: 10,
         bottom: 10,
     };
@@ -93,12 +128,13 @@ function update_graph(data) {
             stroke_color: '#7570b3',
         },
     ];
-    var y_axis_start=0;
+
+    var y_axis_start=margin.top;
     for (i in y_meta) {
 
         // Calculate the axis position
         const fig_height = y_meta[i].height * axis_height;
-        const range = [y_axis_start + fig_height, y_axis_start];
+        const range = [y_axis_start + fig_height, y_axis_start + (i == 0 ? 0 : 20)];
         y_axis_start += fig_height;
 
         // Axis scale
@@ -107,10 +143,21 @@ function update_graph(data) {
             .domain(y_meta[i].domain)
             .range(range);
 
-        // Add y axis
+        // Add the top x-axis, but only show ticks for the first graph
+        // Top most x axis
+        const x_axis_top = i == 0 ? d3.axisTop(x) : d3.axisTop(x).tickFormat("");
         svg.append('g')
-            .append('g')
+            .attr('transform', 'translate(0, ' + (range[1]) + ')')
+            .call(x_axis_top);
+
+        // Add the y axis on the left
+        svg.append('g')
             .call(d3.axisLeft(y_meta[i].scale));
+
+        // Add the y axis on the right
+        svg.append('g')
+            .attr('transform', 'translate(' + axis_width + ', 0)')
+            .call(d3.axisRight(y_meta[i].scale));
 
         const label_offset = 10;
         svg.append('text')
@@ -138,13 +185,21 @@ function update_graph(data) {
                   .y(function(d) {return y_meta[i].scale(d[y_meta[i].variable]); })
                  );
 
+        // Add the x-axis, but only show ticks for the last graph
+        const x_axis_bottom = i == y_meta.length-1 ? d3.axisBottom(x) : d3.axisBottom(x).tickFormat("");
+        svg.append('g')
+            .attr('transform', 'translate(0, ' + (y_axis_start) + ')')
+            .call(x_axis_bottom);
     }
 
-    // Add x axis
-    svg.append('g')
-        .attr('transform', 'translate(0, ' + axis_height + ')')
-        .call(d3.axisBottom(x));
-
+    /*
+    const x_label = make_x_axis_label(data);
+    svg.append('text')
+        .attr('text-anchor', 'middle')
+        .attr('x', axis_width/2)
+        .attr('y', 1.075 * axis_height)
+        .text(x_label);
+    */
 }
 
 function get_base_uri() {
@@ -153,19 +208,15 @@ function get_base_uri() {
     return uri.substring(0, hash_pos > 0 ? hash_pos : uri.length);
 }
 
-function get_data(minute_bucket_size) {
+function update_data(minute_bucket_size) {
     const url = encodeURI(get_base_uri() + '/data/' + minute_bucket_size);
     fetch(url)
         .then((response) => response.text())
         .then((d) => {
             const data = JSON.parse(d);
             update_graph(data);
+            update_title(data);
         });
-}
-
-function get_url_fragment() {
-    const hash = window.location.hash;
-    return hash.substring(1, hash.length);
 }
 
 function get_minute_bucket_size(fragment) {
@@ -198,8 +249,9 @@ onhashchange = (event) => {
 
     const fragment = get_url_fragment();
     const time_bucket = get_minute_bucket_size(fragment);
+    console.log(time_bucket);
     if (time_bucket > 0) {
-        get_data(time_bucket);
+        update_data(time_bucket);
         update_pagination(fragment);
         return;
     }
@@ -207,7 +259,7 @@ onhashchange = (event) => {
     // 'redirect' to the hour selection for invalid fragments
     const next_uri = encodeURI(get_base_uri() + '#hour');
     window.history.replaceState({}, document.title, next_uri);
-    get_data(1);
+    update_data(1);
     update_pagination('hour');
 };
 
