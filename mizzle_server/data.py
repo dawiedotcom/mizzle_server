@@ -3,8 +3,7 @@ import pandas as pd
 
 from .config import Config
 
-def make_timescale_query(n_minutes, limit):
-    limit_clause = f'limit {limit}' if limit > 0 else '';
+def make_timescale_query(n_minutes, interval):
     return f'''
     select
         time_bucket('{n_minutes} minute', datetime) as time,
@@ -17,9 +16,10 @@ def make_timescale_query(n_minutes, limit):
         average(stats_agg(wind_speed_ave)) as wind_speed_ave
     from
         mizzle_readings
+    where
+        datetime > now() at time zone 'Europe/London' - '{interval}'::interval
     group by time
     order by time desc
-    {limit_clause}
     '''
 
 def query(q):
@@ -27,8 +27,8 @@ def query(q):
         data = pd.read_sql_query(q, conn)
     return data
 
-def get_time_averaged(time_bucket_minutes, limit=0):
-    return query(make_timescale_query(time_bucket_minutes, limit))
+def get_time_averaged(time_bucket_minutes, interval='3 hours'):
+    return query(make_timescale_query(time_bucket_minutes, interval))
     #if format == 'json':
     #    return data.to_json(date_format='iso', orient='records')
     #return data

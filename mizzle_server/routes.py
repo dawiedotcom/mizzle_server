@@ -62,19 +62,19 @@ def data(time_bucket_minutes):
     except ValueError:
         return '[]'
 
-    limit = 180;
+    interval = "3 hours"
     if time_bucket_minutes == 10:
-        limit = 145 # = 24 * 60 / 10 -- Limit results to one day
+        interval = "1 day"
     if time_bucket_minutes == 60:
-        limit = 169 # = 7 * 24 * 60 / 60 -- Limit results to one week
+        interval = "7 days"
     if time_bucket_minutes == 180:
-        limit = 225 # = 4 * 7 * 24 * 60 / (3*60) -- Limit results to four weeks
+        interval = "28 days"
     if time_bucket_minutes == 720:
-        limit = 183 # = 13 * 7 * 24 * 60 / (12*60) -- Limit results to 3 months
+        interval = "3 months"
     if time_bucket_minutes == 1448:
-        limit = 366 # = 52 * 7 * 24 * 60 / (24*60) -- Limit results to one year
+        interval = "1 year"
 
-    return get_time_averaged(time_bucket_minutes, limit=limit).to_json(date_format='iso', orient='records')
+    return get_time_averaged(time_bucket_minutes, interval=interval).to_json(date_format='iso', orient='records')
 
 @app.route('/<path:path>')
 def page(path):
