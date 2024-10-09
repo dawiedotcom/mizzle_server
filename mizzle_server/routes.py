@@ -5,7 +5,7 @@ from flask_flatpages import FlatPages
 import re
 import io
 
-from .data import get_time_averaged, make_csv
+from .data import get_time_averaged, get_days_with_data, make_csv
 
 pages = FlatPages(app)
 
@@ -28,7 +28,7 @@ def index():
 
 @app.route('/download')
 def download():
-    days = get_time_averaged(24*60)
+    days = get_days_with_data()
     csv_files = [
         str(date).split(' ')[0] + '_minute_data.csv'
         for date in days['time'].tolist()

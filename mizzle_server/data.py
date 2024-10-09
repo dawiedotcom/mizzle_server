@@ -27,6 +27,10 @@ def query(q):
         data = pd.read_sql_query(q, conn)
     return data
 
+def get_days_with_data():
+    q = "select time_bucket('1 day', datetime) as time from mizzle_readings group by time order by time desc"
+    return query(q)
+
 def get_time_averaged(time_bucket_minutes, interval='3 hours'):
     return query(make_timescale_query(time_bucket_minutes, interval))
     #if format == 'json':
