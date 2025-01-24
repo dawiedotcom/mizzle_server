@@ -1,5 +1,8 @@
 #!/bin/bash
 
+. .venv/bin/activate
+. app_env
+
 export FLASK_APP=mizzle_server
 #export SCRIPT_NAME=/dev/cresh
 

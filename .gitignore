@@ -1,4 +1,4 @@
-app-env
+app[-_]env
 venv/
 
 build/

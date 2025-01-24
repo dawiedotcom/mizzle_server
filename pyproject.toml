@@ -1,0 +1,17 @@
+[project]
+name = "mizzle-server"
+version = "0.0.2"
+description = "A web app to display weather data from the JCMB weather station"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "flask>=3.1.0",
+    "flask-flatpages>=0.8.3",
+    "gunicorn>=23.0.0",
+    "pandas>=2.2.3",
+    "psycopg2>=2.9.10",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
