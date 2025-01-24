@@ -58,6 +58,11 @@ function get_pressure_domain(data) {
 function get_humidity_domain(data) {
     return get_domain(data, function(d) {return d.humidity; });
 }
+function get_wind_speed_domain(data) {
+    var wind_speed_min = get_domain(data, function(d) {return d.wind_speed_min; })[0];
+    var wind_speed_max = get_domain(data, function(d) {return d.wind_speed_max; })[1];
+    return [wind_speed_min, wind_speed_max];
+}
 
 function mouseover(d) {
 
@@ -70,15 +75,15 @@ function update_graph(data) {
     }
 
     const axis_width = 700;
-    const axis_height = 600;
+    const axis_height = 800;
     const margin = {
         left: 140,
         right: 140,
         top: 10,
-        bottom: 10,
+        bottom: 50,
     };
     const svg_width = axis_width + margin.left + margin.right;
-    const svg_height = axis_width + margin.top + margin.bottom;
+    const svg_height = axis_height + margin.top + margin.bottom;
 
     d3.selectAll('svg').remove();
 
@@ -102,12 +107,13 @@ function update_graph(data) {
         .domain(d3.extent(data, function (d) {return d.time;}))
         .range([0, axis_width]);
 
+    // Color scheme from colorbrewer quantitative Dark2
     const y_meta = [
         {
             variable: 'temp_air',
             text_label: 'Temp.',
             unit_label: '[C]',
-            height: 0.6,
+            height: 0.4,
             domain: get_temp_domain(data),
             stroke_color: '#1b9e77',
         },
@@ -126,6 +132,15 @@ function update_graph(data) {
             height: 0.2,
             domain: get_humidity_domain(data),
             stroke_color: '#7570b3',
+        },
+        {
+            variable: 'wind_speed_ave',
+            fill_variables: ['wind_speed_min', 'wind_speed_max'],
+            text_label: 'Wind Speed',
+            unit_label: '[m/s]',
+            height: 0.2,
+            domain: get_wind_speed_domain(data),
+            stroke_color: '#e7298a',
         },
     ];
 
@@ -184,6 +199,19 @@ function update_graph(data) {
                   .x(function(d) {return x(d.time); })
                   .y(function(d) {return y_meta[i].scale(d[y_meta[i].variable]); })
                  );
+
+        // Add a fill around the graph if needed:
+        if (y_meta[i].fill_variables) {
+            svg.append('path')
+                .datum(data)
+                .attr('fill', y_meta[i].stroke_color)
+                .attr('opacity', 0.5)
+                .attr('d', d3.area()
+                        .x(function(d, i) {return x(d.time); })
+                        .y0(function(d) {return y_meta[i].scale( d[y_meta[i].fill_variables[1]] ); })
+                        .y1(function(d) {return y_meta[i].scale( d[y_meta[i].fill_variables[0]] ); })
+                );
+        }
 
         // Add the x-axis, but only show ticks for the last graph
         const x_axis_bottom = i == y_meta.length-1 ? d3.axisBottom(x) : d3.axisBottom(x).tickFormat("");
@@ -249,7 +277,6 @@ onhashchange = (event) => {
 
     const fragment = get_url_fragment();
     const time_bucket = get_minute_bucket_size(fragment);
-    console.log(time_bucket);
     if (time_bucket > 0) {
         update_data(time_bucket);
         update_pagination(fragment);
